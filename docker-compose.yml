@@ -1,0 +1,61 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: shopapi_sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' -No -C || exit 1"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 5s
+
+  shopapi:
+    build:
+      context: .
+      dockerfile: ShopAPI/Dockerfile
+    container_name: shopapi
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # TODO: Replace with restricted runtime SQL login (SELECT/INSERT/UPDATE/DELETE only)
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ShopDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+      # TODO: Replace with privileged SQL login for migrations (DDL rights)
+      - ConnectionStrings__MigrationConnection=Server=sqlserver,1433;Database=ShopDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  shopblazorserver:
+    build:
+      context: .
+      dockerfile: ShopBlazorServer/Dockerfile
+    container_name: shopblazorserver
+    ports:
+      - "8081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ApiBaseUrl=http://shopapi:8080
+    depends_on:
+      - shopapi
+
+  shopblazorwasm:
+    build:
+      context: .
+      dockerfile: ShopBlazorWasm/Dockerfile
+    container_name: shopblazorwasm
+    ports:
+      - "8082:80"
+    depends_on:
+      - shopapi
+
+volumes:
+  sqlserver_data:

@@ -1,0 +1,231 @@
+@page "/orders"
+@inject HttpClient Http
+
+<PageTitle>Orders</PageTitle>
+<h3>Orders</h3>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<button class="btn btn-primary mb-3" @onclick="ShowCreate">+ New Order</button>
+
+@if (showCreateForm)
+{
+    <div class="card mb-3 p-3">
+        <h5>Create Order</h5>
+        <div class="mb-2">
+            <label>User</label>
+            <select class="form-control" @bind="formUserId">
+                <option value="">-- Select User --</option>
+                @foreach (var u in users ?? [])
+                {
+                    <option value="@u.UserId">@u.FirstName @u.LastName</option>
+                }
+            </select>
+        </div>
+        <div class="mb-2">
+            <label>Product</label>
+            <select class="form-control" @bind="formProductId">
+                <option value="">-- Select Product --</option>
+                @foreach (var p in products ?? [])
+                {
+                    <option value="@p.ProductId">@p.ProductName (@p.Price.ToString("C"))</option>
+                }
+            </select>
+        </div>
+        <div class="mb-2">
+            <label>Total Paid</label>
+            <input class="form-control" type="number" step="0.01" @bind="formTotalPaid" />
+        </div>
+        <button class="btn btn-success me-2" @onclick="CreateOrder">Save</button>
+        <button class="btn btn-secondary" @onclick="() => showCreateForm = false">Cancel</button>
+    </div>
+}
+
+<EditModal Title="Edit Order"
+           Visible="showEditModal"
+           OnClose="CloseEditModal"
+           OnConfirm="SaveEdit">
+    <div class="mb-2">
+        <label>Order ID</label>
+        <input class="form-control" value="@editingId" readonly style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed;" />
+    </div>
+    <div class="mb-2">
+        <label>User</label>
+        <select class="form-control" @bind="formUserId">
+            <option value="">-- Select User --</option>
+            @foreach (var u in users ?? [])
+            {
+                <option value="@u.UserId">@u.FirstName @u.LastName</option>
+            }
+        </select>
+    </div>
+    <div class="mb-2">
+        <label>Product</label>
+        <select class="form-control" @bind="formProductId">
+            <option value="">-- Select Product --</option>
+            @foreach (var p in products ?? [])
+            {
+                <option value="@p.ProductId">@p.ProductName (@p.Price.ToString("C"))</option>
+            }
+        </select>
+    </div>
+    <div class="mb-2">
+        <label>Total Paid</label>
+        <input class="form-control" type="number" step="0.01" @bind="formTotalPaid" />
+    </div>
+</EditModal>
+
+<DeleteConfirmModal Visible="showDeleteModal"
+                    EntityName="order"
+                    EntityDescription="@deleteDescription"
+                    OnClose="CloseDeleteModal"
+                    OnConfirm="ConfirmDelete" />
+
+@if (orders is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Product</th>
+                <th>Total Paid</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>@order.OrderId.ToString()[..8]...</td>
+                    <td>@GetUserName(order.UserId)</td>
+                    <td>@GetProductName(order.ProductId)</td>
+                    <td>@order.TotalPaid.ToString("C")</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1" @onclick="() => ShowEdit(order)">Edit</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => ShowDelete(order)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<OrderResponseDto>? orders;
+    private List<UserResponseDto>? users;
+    private List<ProductResponseDto>? products;
+    private string? errorMessage;
+    private bool showCreateForm;
+    private bool showEditModal;
+    private bool showDeleteModal;
+    private Guid editingId;
+    private Guid deletingId;
+    private string deleteDescription = string.Empty;
+    private Guid formUserId;
+    private Guid formProductId;
+    private decimal formTotalPaid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.WhenAll(LoadOrders(), LoadUsers(), LoadProducts());
+    }
+
+    private async Task LoadOrders()
+    {
+        try { orders = await Http.GetFromJsonAsync<List<OrderResponseDto>>("api/orders"); }
+        catch (Exception ex) { errorMessage = $"Failed to load orders: {ex.Message}"; }
+    }
+
+    private async Task LoadUsers()
+    {
+        try { users = await Http.GetFromJsonAsync<List<UserResponseDto>>("api/users"); }
+        catch (Exception ex) { errorMessage = $"Failed to load users: {ex.Message}"; }
+    }
+
+    private async Task LoadProducts()
+    {
+        try { products = await Http.GetFromJsonAsync<List<ProductResponseDto>>("api/products"); }
+        catch (Exception ex) { errorMessage = $"Failed to load products: {ex.Message}"; }
+    }
+
+    private string GetUserName(Guid id)
+    {
+        var user = users?.FirstOrDefault(u => u.UserId == id);
+        return user is null ? id.ToString()[..8] : $"{user.FirstName} {user.LastName}";
+    }
+
+    private string GetProductName(Guid id)
+        => products?.FirstOrDefault(p => p.ProductId == id)?.ProductName ?? id.ToString()[..8];
+
+    private void ShowCreate()
+    {
+        formUserId = formProductId = Guid.Empty;
+        formTotalPaid = 0;
+        showCreateForm = true;
+    }
+
+    private void ShowEdit(OrderResponseDto order)
+    {
+        editingId = order.OrderId;
+        formUserId = order.UserId;
+        formProductId = order.ProductId;
+        formTotalPaid = order.TotalPaid;
+        showEditModal = true;
+    }
+
+    private void ShowDelete(OrderResponseDto order)
+    {
+        deletingId = order.OrderId;
+        deleteDescription = $"{GetUserName(order.UserId)} — {GetProductName(order.ProductId)} — {order.TotalPaid.ToString("C")}";
+        showDeleteModal = true;
+    }
+
+    private void CloseEditModal() => showEditModal = false;
+    private void CloseDeleteModal() => showDeleteModal = false;
+
+    private async Task CreateOrder()
+    {
+        try
+        {
+            errorMessage = null;
+            var dto = new CreateOrderDto { UserId = formUserId, ProductId = formProductId, TotalPaid = formTotalPaid };
+            await Http.PostAsJsonAsync("api/orders", dto);
+            showCreateForm = false;
+            await LoadOrders();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to create order: {ex.Message}"; }
+    }
+
+    private async Task SaveEdit()
+    {
+        try
+        {
+            errorMessage = null;
+            var dto = new UpdateOrderDto { UserId = formUserId, ProductId = formProductId, TotalPaid = formTotalPaid };
+            await Http.PutAsJsonAsync($"api/orders/{editingId}", dto);
+            showEditModal = false;
+            await LoadOrders();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to update order: {ex.Message}"; }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        try
+        {
+            errorMessage = null;
+            await Http.DeleteAsync($"api/orders/{deletingId}");
+            showDeleteModal = false;
+            await LoadOrders();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to delete order: {ex.Message}"; }
+    }
+}

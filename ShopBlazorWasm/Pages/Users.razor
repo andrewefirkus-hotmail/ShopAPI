@@ -1,0 +1,204 @@
+@page "/users"
+@inject HttpClient Http
+
+<PageTitle>Users</PageTitle>
+<h3>Users</h3>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<button class="btn btn-primary mb-3" @onclick="ShowCreate">+ New User</button>
+
+@if (showCreateForm)
+{
+    <div class="card mb-3 p-3">
+        <h5>Create User</h5>
+        <div class="mb-2">
+            <label>First Name</label>
+            <input class="form-control" @bind="formFirstName" />
+        </div>
+        <div class="mb-2">
+            <label>Last Name</label>
+            <input class="form-control" @bind="formLastName" />
+        </div>
+        <div class="mb-2">
+            <label>Email</label>
+            <input class="form-control" type="email" @bind="formEmail" />
+        </div>
+        <div class="mb-2">
+            <label>Address</label>
+            <input class="form-control" @bind="formAddress" />
+        </div>
+        <button class="btn btn-success me-2" @onclick="CreateUser">Save</button>
+        <button class="btn btn-secondary" @onclick="() => showCreateForm = false">Cancel</button>
+    </div>
+}
+
+<EditModal Title="Edit User"
+           Visible="showEditModal"
+           OnClose="CloseEditModal"
+           OnConfirm="SaveEdit">
+    <div class="mb-2">
+        <label>User ID</label>
+        <input class="form-control" value="@editingId" readonly style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed;" />
+    </div>
+    <div class="mb-2">
+        <label>First Name</label>
+        <input class="form-control" @bind="formFirstName" />
+    </div>
+    <div class="mb-2">
+        <label>Last Name</label>
+        <input class="form-control" @bind="formLastName" />
+    </div>
+    <div class="mb-2">
+        <label>Email</label>
+        <input class="form-control" type="email" @bind="formEmail" />
+    </div>
+    <div class="mb-2">
+        <label>Address</label>
+        <input class="form-control" @bind="formAddress" />
+    </div>
+</EditModal>
+
+<DeleteConfirmModal Visible="showDeleteModal"
+                    EntityName="user"
+                    EntityDescription="@deleteDescription"
+                    OnClose="CloseDeleteModal"
+                    OnConfirm="ConfirmDelete" />
+
+@if (users is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.Email</td>
+                    <td>@user.Address</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1" @onclick="() => ShowEdit(user)">Edit</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => ShowDelete(user)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<UserResponseDto>? users;
+    private string? errorMessage;
+    private bool showCreateForm;
+    private bool showEditModal;
+    private bool showDeleteModal;
+    private Guid editingId;
+    private Guid deletingId;
+    private string deleteDescription = string.Empty;
+    private string formFirstName = string.Empty;
+    private string formLastName = string.Empty;
+    private string formAddress = string.Empty;
+    private string formEmail = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await LoadUsers();
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            errorMessage = null;
+            users = await Http.GetFromJsonAsync<List<UserResponseDto>>("api/users");
+        }
+        catch (Exception ex) { errorMessage = $"Failed to load users: {ex.Message}"; }
+    }
+
+    private void ShowCreate()
+    {
+        formFirstName = formLastName = formAddress = formEmail = string.Empty;
+        showCreateForm = true;
+    }
+
+    private void ShowEdit(UserResponseDto user)
+    {
+        editingId = user.UserId;
+        formFirstName = user.FirstName;
+        formLastName = user.LastName;
+        formAddress = user.Address;
+        formEmail = user.Email;
+        showEditModal = true;
+    }
+
+    private void ShowDelete(UserResponseDto user)
+    {
+        deletingId = user.UserId;
+        deleteDescription = $"{user.FirstName} {user.LastName} — {user.Email}";
+        showDeleteModal = true;
+    }
+
+    private void CloseEditModal() => showEditModal = false;
+    private void CloseDeleteModal() => showDeleteModal = false;
+
+    private async Task CreateUser()
+    {
+        try
+        {
+            errorMessage = null;
+            var dto = new CreateUserDto { FirstName = formFirstName, LastName = formLastName, Address = formAddress, Email = formEmail };
+            var response = await Http.PostAsJsonAsync("api/users", dto);
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = await response.Content.ReadAsStringAsync();
+                return;
+            }
+            showCreateForm = false;
+            await LoadUsers();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to create user: {ex.Message}"; }
+    }
+
+    private async Task SaveEdit()
+    {
+        try
+        {
+            errorMessage = null;
+            var dto = new UpdateUserDto { FirstName = formFirstName, LastName = formLastName, Address = formAddress, Email = formEmail };
+            var response = await Http.PutAsJsonAsync($"api/users/{editingId}", dto);
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = await response.Content.ReadAsStringAsync();
+                return;
+            }
+            showEditModal = false;
+            await LoadUsers();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to update user: {ex.Message}"; }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        try
+        {
+            errorMessage = null;
+            await Http.DeleteAsync($"api/users/{deletingId}");
+            showDeleteModal = false;
+            await LoadUsers();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to delete user: {ex.Message}"; }
+    }
+}

@@ -1,0 +1,183 @@
+@page "/products"
+@inject HttpClient Http
+
+<PageTitle>Products</PageTitle>
+<h3>Products</h3>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<button class="btn btn-primary mb-3" @onclick="ShowCreate">+ New Product</button>
+
+@if (showCreateForm)
+{
+    <div class="card mb-3 p-3">
+        <h5>Create Product</h5>
+        <div class="mb-2">
+            <label>Product Name</label>
+            <input class="form-control" @bind="formProductName" />
+        </div>
+        <div class="mb-2">
+            <label>Description</label>
+            <input class="form-control" @bind="formDescription" />
+        </div>
+        <div class="mb-2">
+            <label>Price</label>
+            <input class="form-control" type="number" step="0.01" @bind="formPrice" />
+        </div>
+        <button class="btn btn-success me-2" @onclick="CreateProduct">Save</button>
+        <button class="btn btn-secondary" @onclick="() => showCreateForm = false">Cancel</button>
+    </div>
+}
+
+<EditModal Title="Edit Product"
+           Visible="showEditModal"
+           OnClose="CloseEditModal"
+           OnConfirm="SaveEdit">
+    <div class="mb-2">
+        <label>Product ID</label>
+        <input class="form-control" value="@editingId" readonly style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed;" />
+    </div>
+    <div class="mb-2">
+        <label>Product Name</label>
+        <input class="form-control" @bind="formProductName" />
+    </div>
+    <div class="mb-2">
+        <label>Description</label>
+        <input class="form-control" @bind="formDescription" />
+    </div>
+    <div class="mb-2">
+        <label>Price</label>
+        <input class="form-control" type="number" step="0.01" @bind="formPrice" />
+    </div>
+</EditModal>
+
+<DeleteConfirmModal Visible="showDeleteModal"
+                    EntityName="product"
+                    EntityDescription="@deleteDescription"
+                    OnClose="CloseDeleteModal"
+                    OnConfirm="ConfirmDelete" />
+
+@if (products is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
+            {
+                <tr>
+                    <td>@product.ProductName</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price.ToString("C")</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1" @onclick="() => ShowEdit(product)">Edit</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => ShowDelete(product)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ProductResponseDto>? products;
+    private string? errorMessage;
+    private bool showCreateForm;
+    private bool showEditModal;
+    private bool showDeleteModal;
+    private Guid editingId;
+    private Guid deletingId;
+    private string deleteDescription = string.Empty;
+    private string formProductName = string.Empty;
+    private string formDescription = string.Empty;
+    private decimal formPrice;
+
+    protected override async Task OnInitializedAsync() => await LoadProducts();
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            errorMessage = null;
+            products = await Http.GetFromJsonAsync<List<ProductResponseDto>>("api/products");
+        }
+        catch (Exception ex) { errorMessage = $"Failed to load products: {ex.Message}"; }
+    }
+
+    private void ShowCreate()
+    {
+        formProductName = formDescription = string.Empty;
+        formPrice = 0;
+        showCreateForm = true;
+    }
+
+    private void ShowEdit(ProductResponseDto product)
+    {
+        editingId = product.ProductId;
+        formProductName = product.ProductName;
+        formDescription = product.Description;
+        formPrice = product.Price;
+        showEditModal = true;
+    }
+
+    private void ShowDelete(ProductResponseDto product)
+    {
+        deletingId = product.ProductId;
+        deleteDescription = $"{product.ProductName} — {product.Price.ToString("C")}";
+        showDeleteModal = true;
+    }
+
+    private void CloseEditModal() => showEditModal = false;
+    private void CloseDeleteModal() => showDeleteModal = false;
+
+    private async Task CreateProduct()
+    {
+        try
+        {
+            errorMessage = null;
+            var dto = new CreateProductDto { ProductName = formProductName, Description = formDescription, Price = formPrice };
+            await Http.PostAsJsonAsync("api/products", dto);
+            showCreateForm = false;
+            await LoadProducts();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to create product: {ex.Message}"; }
+    }
+
+    private async Task SaveEdit()
+    {
+        try
+        {
+            errorMessage = null;
+            var dto = new UpdateProductDto { ProductName = formProductName, Description = formDescription, Price = formPrice };
+            await Http.PutAsJsonAsync($"api/products/{editingId}", dto);
+            showEditModal = false;
+            await LoadProducts();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to update product: {ex.Message}"; }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        try
+        {
+            errorMessage = null;
+            await Http.DeleteAsync($"api/products/{deletingId}");
+            showDeleteModal = false;
+            await LoadProducts();
+        }
+        catch (Exception ex) { errorMessage = $"Failed to delete product: {ex.Message}"; }
+    }
+}
