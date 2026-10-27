@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.4338480">
+  <PropertyGroup>
+    <!-- Command Visual Studio runs on F5 (debug) -->
+    <StartupCommand>npm start</StartupCommand>
+    <!-- Browser tab opened automatically when the dev server is ready -->
+    <StartupUri>http://localhost:4200</StartupUri>
+    <!-- Suppress VS trying to compile TypeScript itself (Angular CLI owns TS) -->
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <!-- Skip running 'npm run build' on solution build; ng serve handles it -->
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
+    <JavaScriptTestFramework>None</JavaScriptTestFramework>
+    <DefaultConfiguration>Debug</DefaultConfiguration>
+    <DefaultPlatform>AnyCPU</DefaultPlatform>
+    <!--
+      Declares a target framework so NuGet restore doesn't error — the JavaScript
+      SDK overrides all build targets so this has no effect on how Angular runs.
+    -->
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+</Project>

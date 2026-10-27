@@ -1,0 +1,110 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Page layout ───────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+/* ── Dialog form fields ────────────────────────────────────── */
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.25rem 0;
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+
+    label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+    }
+
+    .readonly-field {
+      background-color: #e9ecef !important;
+      color: #6c757d !important;
+      cursor: not-allowed !important;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+/* ── Error alert ───────────────────────────────────────────── */
+.error-alert {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Footer confirm state ──────────────────────────────────── */
+.confirm-text {
+  margin-right: auto;
+  font-weight: 600;
+  color: #d97706;
+  font-size: 0.9rem;
+}
+
+/* ── Table action buttons ──────────────────────────────────── */
+.action-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.empty-message {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem 0 !important;
+}
+
+/* ── Delete dialog (global — overlays are outside component) ── */
+.delete-dialog {
+  .p-dialog-header {
+    background: #dc2626 !important;
+    color: white !important;
+    border-bottom: none !important;
+  }
+
+  .p-dialog-header-icons button {
+    color: rgba(255, 255, 255, 0.8) !important;
+    &:hover { background: rgba(255,255,255,0.15) !important; }
+  }
+}
+
+.delete-message {
+  margin: 0;
+  color: #374151;
+  line-height: 1.6;
+}

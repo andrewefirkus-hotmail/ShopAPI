@@ -57,5 +57,15 @@ services:
     depends_on:
       - shopapi
 
+  shopangular:
+    build:
+      context: ./ShopAngular
+      dockerfile: Dockerfile
+    container_name: shopangular
+    ports:
+      - "8083:80"
+    depends_on:
+      - shopapi
+
 volumes:
   sqlserver_data:

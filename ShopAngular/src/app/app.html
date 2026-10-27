@@ -1,0 +1,33 @@
+<nav class="app-nav">
+  <div class="nav-brand">
+    <i class="pi pi-shopping-cart"></i>
+    Shop App
+    <span class="nav-badge">Angular</span>
+  </div>
+
+  <div class="nav-links">
+    <a routerLink="/users" routerLinkActive="active">
+      <i class="pi pi-users"></i> Users
+    </a>
+    <a routerLink="/products" routerLinkActive="active">
+      <i class="pi pi-box"></i> Products
+    </a>
+    <a routerLink="/orders" routerLinkActive="active">
+      <i class="pi pi-shopping-bag"></i> Orders
+    </a>
+  </div>
+
+  <div class="nav-switch">
+    <span class="switch-label">Switch to:</span>
+    <a [href]="blazorServerUrl" class="frontend-link">
+      <i class="pi pi-server"></i> Blazor Server
+    </a>
+    <a [href]="blazorWasmUrl" class="frontend-link">
+      <i class="pi pi-globe"></i> Blazor WASM
+    </a>
+  </div>
+</nav>
+
+<main class="app-main">
+  <router-outlet />
+</main>

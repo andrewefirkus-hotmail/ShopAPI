@@ -1,0 +1,89 @@
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
+  height: 56px;
+  background: #1e293b;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+
+    i { font-size: 1.2rem; color: #60a5fa; }
+
+    .nav-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      background: #ef4444;
+      color: white;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.25rem;
+    flex: 1;
+
+    a {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+
+      &:hover { background: rgba(255,255,255,0.08); color: white; }
+      &.active { background: rgba(96,165,250,0.18); color: #60a5fa; }
+    }
+  }
+
+  .nav-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .switch-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    .frontend-link {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      white-space: nowrap;
+
+      &:hover { border-color: #60a5fa; color: #60a5fa; }
+    }
+  }
+}
+
+.app-main {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}

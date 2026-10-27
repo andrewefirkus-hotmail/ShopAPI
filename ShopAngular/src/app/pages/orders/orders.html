@@ -1,0 +1,182 @@
+<p-toast />
+
+<div class="page-header">
+  <h2><i class="pi pi-shopping-bag"></i> Orders</h2>
+  <p-button label="New Order" icon="pi pi-plus" (onClick)="openCreate()" />
+</div>
+
+<!-- ── Create Dialog ─────────────────────────────────────── -->
+<p-dialog
+  header="New Order"
+  [(visible)]="showCreate"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+  [draggable]="false">
+
+  <div class="form-fields">
+    <div class="field">
+      <label>User</label>
+      <p-select
+        [(ngModel)]="createForm.userId"
+        [options]="userOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select a user"
+        [style]="{ width: '100%' }" />
+    </div>
+    <div class="field">
+      <label>Product</label>
+      <p-select
+        [(ngModel)]="createForm.productId"
+        [options]="productOptions()"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select a product"
+        [style]="{ width: '100%' }" />
+    </div>
+    <div class="field">
+      <label>Total Paid</label>
+      <p-inputnumber
+        [(ngModel)]="createForm.totalPaid"
+        mode="currency"
+        currency="USD"
+        locale="en-US"
+        [minFractionDigits]="2" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Create" icon="pi pi-check" severity="success" (onClick)="submitCreate()" />
+    <p-button label="Cancel" severity="secondary" (onClick)="showCreate = false" />
+  </ng-template>
+</p-dialog>
+
+<!-- ── Edit Dialog ───────────────────────────────────────── -->
+<p-dialog
+  header="Edit Order"
+  [(visible)]="showEdit"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+  [closable]="false"
+  [draggable]="false">
+
+  <div class="form-fields">
+    <div class="field">
+      <label>ID</label>
+      <input pInputText [value]="editForm.orderId" readonly class="readonly-field" />
+    </div>
+    <div class="field">
+      <label>User</label>
+      <p-select
+        [(ngModel)]="editForm.userId"
+        [options]="userOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [style]="{ width: '100%' }" />
+    </div>
+    <div class="field">
+      <label>Product</label>
+      <p-select
+        [(ngModel)]="editForm.productId"
+        [options]="productOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [style]="{ width: '100%' }" />
+    </div>
+    <div class="field">
+      <label>Total Paid</label>
+      <p-inputnumber
+        [(ngModel)]="editForm.totalPaid"
+        mode="currency"
+        currency="USD"
+        locale="en-US"
+        [minFractionDigits]="2" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    @if (confirmPending) {
+      <span class="confirm-text">Save these changes?</span>
+      <p-button label="Yes, Save" icon="pi pi-check" severity="success" (onClick)="confirmEdit()" />
+      <p-button label="Go Back" severity="secondary" (onClick)="cancelConfirm()" />
+    } @else {
+      <p-button label="Save" icon="pi pi-check" severity="success" (onClick)="requestConfirm()" />
+      <p-button label="Cancel" severity="secondary" (onClick)="closeEdit()" />
+    }
+  </ng-template>
+</p-dialog>
+
+<!-- ── Delete Dialog ─────────────────────────────────────── -->
+<p-dialog
+  [(visible)]="showDelete"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [style]="{ width: '380px' }"
+  styleClass="delete-dialog">
+
+  <ng-template pTemplate="header">
+    <span style="display:flex;align-items:center;gap:.5rem">
+      <i class="pi pi-exclamation-triangle"></i>
+      Confirm Deletion
+    </span>
+  </ng-template>
+
+  <p class="delete-message">
+    Are you sure you want to delete the order for
+    <strong>{{ getUserName(deleteTarget?.userId ?? '') }}</strong>
+    — <em>{{ getProductName(deleteTarget?.productId ?? '') }}</em>?
+    This action cannot be undone.
+  </p>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Yes, Delete" icon="pi pi-trash" severity="danger" (onClick)="confirmDelete()" />
+    <p-button label="Cancel" severity="secondary" (onClick)="showDelete = false" />
+  </ng-template>
+</p-dialog>
+
+<!-- ── Table ─────────────────────────────────────────────── -->
+<p-table
+  [value]="orders()"
+  [loading]="loading()"
+  [paginator]="true"
+  [rows]="10"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="{first}–{last} of {totalRecords} orders"
+  styleClass="p-datatable-striped p-datatable-sm p-datatable-gridlines">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th>User</th>
+      <th>Product</th>
+      <th pSortableColumn="totalPaid" style="width:130px">Total Paid <p-sortIcon field="totalPaid" /></th>
+      <th pSortableColumn="createdAt" style="width:140px">Created <p-sortIcon field="createdAt" /></th>
+      <th pSortableColumn="updatedAt" style="width:140px">Updated <p-sortIcon field="updatedAt" /></th>
+      <th style="width:90px">Actions</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-order>
+    <tr>
+      <td>{{ getUserName(order.userId) }}</td>
+      <td>{{ getProductName(order.productId) }}</td>
+      <td>{{ order.totalPaid | currency }}</td>
+      <td>{{ order.createdAt | date:'short' }}</td>
+      <td>{{ order.updatedAt | date:'short' }}</td>
+      <td>
+        <div class="action-btns">
+          <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
+                    pTooltip="Edit" (onClick)="openEdit(order)" />
+          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                    pTooltip="Delete" (onClick)="openDelete(order)" />
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="6" class="empty-message">No orders found.</td>
+    </tr>
+  </ng-template>
+</p-table>

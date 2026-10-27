@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopBlazorServer", "ShopBla
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopBlazorWasm", "ShopBlazorWasm\ShopBlazorWasm.csproj", "{C583F2C5-062A-4C39-BAA9-8270FD9AA0D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopAngular", "ShopAngular\ShopAngular.csproj", "{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,14 @@ Global
 		{C583F2C5-062A-4C39-BAA9-8270FD9AA0D2}.Release|x64.Build.0 = Release|Any CPU
 		{C583F2C5-062A-4C39-BAA9-8270FD9AA0D2}.Release|x86.ActiveCfg = Release|Any CPU
 		{C583F2C5-062A-4C39-BAA9-8270FD9AA0D2}.Release|x86.Build.0 = Release|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Release|x64.ActiveCfg = Release|Any CPU
+		{3D6F8B1A-9C2E-4A7D-B5F0-E8C1D2A3B4C5}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
