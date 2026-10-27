@@ -1,4 +1,4 @@
-using ShopAPI.Dtos;
+using ShopShared.Dtos;
 
 namespace ShopAPI.Services;
 

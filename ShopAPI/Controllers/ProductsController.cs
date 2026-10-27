@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ShopAPI.Dtos;
+using ShopShared.Dtos;
 using ShopAPI.Services;
 
 namespace ShopAPI.Controllers;

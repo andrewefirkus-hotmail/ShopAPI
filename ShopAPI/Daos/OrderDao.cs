@@ -1,5 +1,5 @@
 using DataAccess.Entities;
-using ShopAPI.Dtos;
+using ShopShared.Dtos;
 
 namespace ShopAPI.Daos;
 

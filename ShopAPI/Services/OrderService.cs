@@ -1,7 +1,7 @@
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using ShopAPI.Daos;
-using ShopAPI.Dtos;
+using ShopShared.Dtos;
 
 namespace ShopAPI.Services;
 
