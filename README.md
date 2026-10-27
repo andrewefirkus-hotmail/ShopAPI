@@ -9,10 +9,24 @@ One ASP.NET Core Web API backed by SQL Server (EF Core code-first), with differe
 |---|---|---|
 | `ShopAPI` | ASP.NET Core Web API (.NET 10) | REST API with Swagger, Serilog, EF Core. Controllers → Services → DAOs. Applies migrations on startup. |
 | `DataAccess` | Class library | `ShopDbContext`, entities (`User`, `Product`, `Order`), EF migrations incl. seed data. |
-| `ShopShared` | Class library | DTOs shared by the Blazor front ends. |
+| `ShopShared` | Class library | DTOs (the API contract) shared by ShopAPI and the Blazor front ends. |
 | `ShopBlazorServer` | Blazor Server (.NET 10) | Interactive-server UI calling the API via a named `HttpClient`. |
 | `ShopBlazorWasm` | Blazor WebAssembly (.NET 10) | Same UI running in the browser; served by nginx in Docker. |
 | `ShopAngular` | Angular 21 (+ small .NET launcher) | Same UI in Angular. `ShopAngular.csproj` just runs `npm start` so it can be launched from Visual Studio. |
+
+## DTOs / API contract
+
+For now the DTOs are **shared**: ShopAPI and both Blazor apps reference the same classes in `ShopShared/Dtos`.
+Renaming or removing a field breaks the Blazor build right away, which is convenient while everything lives
+in one solution and deploys together.
+
+Typically a front end keeps its **own copy of the contract**, separate from the backend. This is what
+`ShopAngular/src/app/models` does. That lets the front end and API be versioned and deployed independently
+(e.g. an old cached WASM build still talking to a newer API). The trade-off is that drift is only caught
+at runtime. If the front ends ever ship on their own schedule, go back to separate DTOs per client and
+version the API (e.g. `/api/v2/...`) when the contract changes.
+
+Either way, the database entities (`DataAccess/Entities`) are never exposed directly: the DAOs map entities to DTOs.
 
 ## API endpoints
 
