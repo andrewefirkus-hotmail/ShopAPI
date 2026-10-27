@@ -1,7 +1,7 @@
 # SimpleApi (ShopAPI)
 
 A playground solution for trying out architecture ideas around a small "shop" domain (Users, Products, Orders).
-One ASP.NET Core Web API backed by SQL Server (EF Core code-first), with three different front ends consuming it.
+One ASP.NET Core Web API backed by SQL Server (EF Core code-first), with different front ends consuming it.
 
 ## Projects
 
